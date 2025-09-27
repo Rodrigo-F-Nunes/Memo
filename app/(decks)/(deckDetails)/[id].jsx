@@ -99,11 +99,17 @@ const DeckDetails = () => {
           )}
 
           {!isFinished && showAnswer && (
-            <View style={styles.buttonGroup}>
-              <TouchableOpacity style={styles.revealButton} onPress={handleNext}>
-                <Text style={styles.revealText}>Próximo</Text>
+            <View style={styles.buttonGroup}> 
+              <TouchableOpacity style={styles.gridButtons} onPress={handleNext}>
+                <Text style={styles.revealText}>Fácil</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.revealButton} onPress={handleSeeAgain}>
+              <TouchableOpacity style={styles.gridButtons} onPress={handleNext}>
+                <Text style={styles.revealText}>Medio</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.gridButtons} onPress={handleNext}>
+                <Text style={styles.revealText}>Dificil</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.gridButtons} onPress={handleSeeAgain}>
                 <Text style={styles.revealText}>Ver de novo</Text>
               </TouchableOpacity>
             </View>
@@ -235,11 +241,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   buttonGroup: {
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    width: '100%',
-    paddingHorizontal: 20,
+   marginTop: 20,
+   flexDirection: 'row',
+    flexWrap: 'wrap',
+   justifyContent: 'center',
+   gap: 10,
+   paddingHorizontal: 20,
+  },
+  gridButtons: {
+    marginTop: 10,
+    backgroundColor: '#3B5EFF',
+    paddingVertical: 10,
+    borderRadius: 20,
+    width: '45%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
   },
   finishedText: {
     fontSize: 18,
