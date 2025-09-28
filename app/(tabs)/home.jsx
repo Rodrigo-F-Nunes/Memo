@@ -72,12 +72,6 @@ const homeDashboard = () => {
            value={inputText}
           onChangeText={setInputText}
           returnKeyType="done"
-          onSubmitEditing={() => {
-          if (inputText.trim()) {
-          setIsModalVisible(true);
-          Keyboard.dismiss(); // hides the keyboard
-          }
-          }}
           />
       </View>
 
@@ -159,25 +153,6 @@ const homeDashboard = () => {
           <Text style={styles.noReviewText}>Nenhum deck para revisar</Text>
         )}
       />
-      <Modal
-  transparent
-  animationType="fade"
-  visible={isModalVisible}
-  onRequestClose={() => setIsModalVisible(false)}
->
-  <View style={styles.modalOverlay}>
-    <View style={styles.modalContent}>
-      <Text style={styles.modalText}>Flashcards gerados!</Text>
-      <Pressable
-        style={styles.modalButton}
-        onPress={() => setIsModalVisible(false)}
-      >
-        <Text style={styles.modalButtonText}>OK</Text>
-      </Pressable>
-    </View>
-  </View>
-</Modal>
-
     </View>
   );
 };
@@ -375,34 +350,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     alignSelf: 'center',
   },
-  modalOverlay: {
-  flex: 1,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-modalContent: {
-  backgroundColor: 'white',
-  padding: 20,
-  borderRadius: 10,
-  alignItems: 'center',
-  width: '80%',
-},
-modalText: {
-  fontSize: 18,
-  fontWeight: 'bold',
-  marginBottom: 15,
-},
-modalButton: {
-  backgroundColor: '#3A5FCD',
-  paddingVertical: 10,
-  paddingHorizontal: 20,
-  borderRadius: 8,
-},
-modalButtonText: {
-  color: '#fff',
-  fontSize: 16,
-},
 
 });
 
