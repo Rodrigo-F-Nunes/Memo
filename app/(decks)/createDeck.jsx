@@ -25,18 +25,19 @@ const CreateDeck = () => {
   const router = useRouter();
 
   useEffect(() => {
+    // initialize at least one card
     if (cards.length === 0) {
       setCards([{ front: '', back: '' }]);
     }
   }, []);
 
   const handleCardInput = (index, side, value) => {
-    const updatedCards = [...cards];
-    if (!updatedCards[index]) {
-      updatedCards[index] = { front: '', back: '' };
+    const updated = [...cards];
+    if (!updated[index]) {
+      updated[index] = { front: '', back: '' };
     }
-    updatedCards[index][side] = value;
-    setCards(updatedCards);
+    updated[index][side] = value;
+    setCards(updated);
   };
 
   const handleAddCard = () => {
@@ -50,34 +51,43 @@ const CreateDeck = () => {
   };
 
   const handleSaveDeck = async () => {
-    if (!title || cards.length === 0) {
-      Alert.alert("Error", "Please enter a title and at least one card.");
+    if (!title.trim() || cards.length === 0) {
+      Alert.alert("Erro", "Insira um título e pelo menos um flashcard.");
       return;
     }
 
-    const hasEmptyCard = cards.some(card => !card.front.trim() || !card.back.trim());
-    if (hasEmptyCard) {
-      Alert.alert("Error", "Please complete all cards before saving.");
+    const hasEmpty = cards.some(c => !c.front.trim() || !c.back.trim());
+    if (hasEmpty) {
+      Alert.alert("Erro", "Todos os flashcards devem ter frente e verso preenchidos.");
       return;
     }
 
     try {
-      const existingDecks = await AsyncStorage.getItem('decks');
-      const decks = existingDecks ? JSON.parse(existingDecks) : [];
+      const existing = await AsyncStorage.getItem('decks');
+      const decks = existing ? JSON.parse(existing) : [];
 
       const newDeck = {
         id: Date.now().toString(),
-        title,
-        cards,
+        title: title.trim(),
+        cards: cards.map(c => ({
+          front: c.front,
+          back: c.back,
+          stats: {
+            easy: 0,
+            medium: 0,
+            difficult: 0
+          }
+        })),
         createdAt: new Date().toISOString(),
         lastReviewed: null,
       };
 
       await AsyncStorage.setItem('decks', JSON.stringify([...decks, newDeck]));
-      Alert.alert("Success", "Deck saved!");
+      Alert.alert("Success", "Deck salvo com sucesso!");
       router.back();
     } catch (error) {
-      Alert.alert("Error", "Failed to save deck.");
+      console.error("Error saving deck:", error);
+      Alert.alert("Error", "Erro ao salvar o deck.");
     }
   };
 
@@ -103,7 +113,7 @@ const CreateDeck = () => {
         <TextInput
           style={styles.input}
           placeholder="Digite aqui..."
-          value={title} 
+          value={title}
           onChangeText={setTitle}
         />
 
@@ -114,16 +124,17 @@ const CreateDeck = () => {
               <Text style={styles.cardFieldLabel}>Frente:</Text>
               <TextInput
                 style={styles.cardInput}
-                onChangeText={(text) => handleCardInput(index, 'front', text)}
+                onChangeText={text => handleCardInput(index, 'front', text)}
                 value={card.front}
               />
 
               <Text style={styles.cardFieldLabel}>Verso:</Text>
               <TextInput
                 style={styles.cardInput}
-                onChangeText={(text) => handleCardInput(index, 'back', text)}
+                onChangeText={text => handleCardInput(index, 'back', text)}
                 value={card.back}
               />
+
               {cards.length > 1 && (
                 <View style={styles.removeButton}>
                   <Button title="Remove Card" color="red" onPress={() => handleRemoveCard(index)} />
@@ -225,7 +236,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginLeft: 10,
     alignSelf: 'flex-start',
-    color: '#333', 
+    color: '#333',
   },
   cardInput: {
     backgroundColor: '#96ACF1',
@@ -273,7 +284,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     marginTop: 5,
     fontSize: 18,
-},
+  },
 });
 
 export default CreateDeck;
