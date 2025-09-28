@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 import backButton from '../../../assets/images/backButton.png';
 import iconememo from '../../../assets/images/iconememo.png';
 import lupa from '../../../assets/images/lupa.png';
@@ -30,7 +31,7 @@ const DeckDetails = () => {
           setShowAnswer(false);
         }
       } catch (error) {
-        console.error("Error loading deck:", error);
+        console.error("Erro", "Deck não encontrado.", error);
       }
     };
 
@@ -41,6 +42,36 @@ const DeckDetails = () => {
 
   const handleReveal = () => {
     setShowAnswer(true);
+  };
+
+  const updateCardStat = async (difficulty) => {
+    if (!deck) return;
+
+    const cardIndex = currentCardIndex;
+    const updatedDeck = { ...deck };
+    const card = updatedDeck.cards[cardIndex];
+
+    if (!card.stats) {
+      card.stats = { easy: 0, medium: 0, difficult: 0 };
+    }
+
+    card.stats[difficulty] += 1;
+
+    try {
+      const storedDecks = await AsyncStorage.getItem('decks');
+      let decks = storedDecks ? JSON.parse(storedDecks) : [];
+
+      decks = decks.map(d => d.id === deck.id ? updatedDeck : d);
+      await AsyncStorage.setItem('decks', JSON.stringify(decks));
+      setDeck(updatedDeck);
+    } catch (error) {
+      console.error('Erro ao salvar estatísticas do card:', error);
+    }
+  };
+
+  const handleDifficulty = async (difficulty) => {
+    await updateCardStat(difficulty);
+    handleNext();
   };
 
   const handleNext = () => {
@@ -99,15 +130,15 @@ const DeckDetails = () => {
           )}
 
           {!isFinished && showAnswer && (
-            <View style={styles.buttonGroup}> 
-              <TouchableOpacity style={styles.gridButtons} onPress={handleNext}>
+            <View style={styles.buttonGroup}>
+              <TouchableOpacity style={styles.gridButtons} onPress={() => handleDifficulty('easy')}>
                 <Text style={styles.revealText}>Fácil</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.gridButtons} onPress={handleNext}>
-                <Text style={styles.revealText}>Medio</Text>
+              <TouchableOpacity style={styles.gridButtons} onPress={() => handleDifficulty('medium')}>
+                <Text style={styles.revealText}>Médio</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.gridButtons} onPress={handleNext}>
-                <Text style={styles.revealText}>Dificil</Text>
+              <TouchableOpacity style={styles.gridButtons} onPress={() => handleDifficulty('difficult')}>
+                <Text style={styles.revealText}>Difícil</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.gridButtons} onPress={handleSeeAgain}>
                 <Text style={styles.revealText}>Ver de novo</Text>
@@ -116,29 +147,28 @@ const DeckDetails = () => {
           )}
 
           {isFinished && (
-  <TouchableOpacity
-    style={styles.revealButton}
-    onPress={async () => {
-      try {
-        const storedDecks = await AsyncStorage.getItem('decks');
-        let decks = storedDecks ? JSON.parse(storedDecks) : [];
+            <TouchableOpacity
+              style={styles.revealButton}
+              onPress={async () => {
+                try {
+                  const storedDecks = await AsyncStorage.getItem('decks');
+                  let decks = storedDecks ? JSON.parse(storedDecks) : [];
 
-        decks = decks.map(d =>
-          d.id === deck.id ? { ...d, lastReviewed: new Date().toISOString() } : d
-        );
+                  decks = decks.map(d =>
+                    d.id === deck.id ? { ...d, lastReviewed: new Date().toISOString() } : d
+                  );
 
-        await AsyncStorage.setItem('decks', JSON.stringify(decks));
-      } catch (err) {
-        console.error("Failed to update lastReviewed:", err);
-      }
+                  await AsyncStorage.setItem('decks', JSON.stringify(decks));
+                } catch (err) {
+                  console.error("Falha ao atualizar últimas revisões:", err);
+                }
 
-      handleBackToDecks();
-    }}
-  >
-    <Text style={styles.revealText}>Voltar para decks</Text>
-  </TouchableOpacity>
-)}
-
+                handleBackToDecks();
+              }}
+            >
+              <Text style={styles.revealText}>Voltar para decks</Text>
+            </TouchableOpacity>
+          )}
         </>
       )}
     </View>
@@ -180,21 +210,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
-  },
-  setupContainer: {
-    marginTop: 40,
-    alignItems: 'center',
-    gap: 20,
-  },
-  toggleButton: {
-    backgroundColor: '#3B5EFF',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 4,
   },
   cardItem: {
     width: 361,
@@ -241,12 +256,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   buttonGroup: {
-   marginTop: 20,
-   flexDirection: 'row',
+    marginTop: 20,
+    flexDirection: 'row',
     flexWrap: 'wrap',
-   justifyContent: 'center',
-   gap: 10,
-   paddingHorizontal: 20,
+    justifyContent: 'center',
+    gap: 10,
+    paddingHorizontal: 20,
   },
   gridButtons: {
     marginTop: 10,
