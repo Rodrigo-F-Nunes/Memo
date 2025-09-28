@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, Keyboard, Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import cronograma from '../../assets/images/cronograma.png';
 import fogo from '../../assets/images/fogo.png';
 import iconememo from '../../assets/images/iconememo.png';
@@ -15,6 +15,8 @@ import streakEmpty from '../../assets/images/streakEmpty.png';
 const homeDashboard = () => {
   const profileName = "Hackathon"; // dynamically later
   const streakDaysCounter = 0;    // dynamically later
+  const [inputText, setInputText] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const router = useRouter();
 
   const [toReviewDecks, setToReviewDecks] = useState([]);
@@ -35,7 +37,7 @@ const homeDashboard = () => {
           const oldestTwo = sorted.slice(0, 2);
           setToReviewDecks(oldestTwo);
         } catch (error) {
-          console.error("Error loading decks:", error);
+          console.error("Erro" ,"Não foi possivel carregar os decks", error);
         }
       };
 
@@ -67,7 +69,16 @@ const homeDashboard = () => {
           style={styles.typingSpace}
           placeholder="Gere 5 flashcards sobre..."
           placeholderTextColor="#FBFBFB"
-        />
+           value={inputText}
+          onChangeText={setInputText}
+          returnKeyType="done"
+          onSubmitEditing={() => {
+          if (inputText.trim()) {
+          setIsModalVisible(true);
+          Keyboard.dismiss(); // hides the keyboard
+          }
+          }}
+          />
       </View>
 
       <Text style={styles.categoriesText}>Streak</Text>
@@ -148,6 +159,25 @@ const homeDashboard = () => {
           <Text style={styles.noReviewText}>Nenhum deck para revisar</Text>
         )}
       />
+      <Modal
+  transparent
+  animationType="fade"
+  visible={isModalVisible}
+  onRequestClose={() => setIsModalVisible(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalText}>Flashcards gerados!</Text>
+      <Pressable
+        style={styles.modalButton}
+        onPress={() => setIsModalVisible(false)}
+      >
+        <Text style={styles.modalButtonText}>OK</Text>
+      </Pressable>
+    </View>
+  </View>
+</Modal>
+
     </View>
   );
 };
@@ -345,6 +375,35 @@ const styles = StyleSheet.create({
     marginTop: 12,
     alignSelf: 'center',
   },
+  modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+modalContent: {
+  backgroundColor: 'white',
+  padding: 20,
+  borderRadius: 10,
+  alignItems: 'center',
+  width: '80%',
+},
+modalText: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  marginBottom: 15,
+},
+modalButton: {
+  backgroundColor: '#3A5FCD',
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+  borderRadius: 8,
+},
+modalButtonText: {
+  color: '#fff',
+  fontSize: 16,
+},
+
 });
 
 export default homeDashboard;
