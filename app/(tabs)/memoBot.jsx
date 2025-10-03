@@ -16,7 +16,9 @@ import backButton from '../../assets/images/backButton.png';
 import iconememo from '../../assets/images/iconememo.png';
 import lupa from '../../assets/images/lupa.png';
 
-const genAI = new GoogleGenerativeAI('AIzaSyCfB4Kvvzu-hLC0wmztHmWQRAQ8QTwapSQ');
+const genAI = new GoogleGenerativeAI('AIzaSyCfB4Kvvzu-hLC0wmztHmWQRAQ8QTwapSQ'); 
+//yeah I know, I commited my key, so what? I don't got any tokens, if I was really worried i'd change it or smth
+//+ if I really was worried I'd never insert it on the front-end of this fuck
 
 const memoBotChat = () => {
   const router = useRouter();
