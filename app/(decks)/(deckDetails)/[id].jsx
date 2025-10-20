@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
 import backButton from '../../../assets/images/backButton.png';
 import iconememo from '../../../assets/images/iconememo.png';
 import lupa from '../../../assets/images/lupa.png';
@@ -46,21 +45,16 @@ const DeckDetails = () => {
 
   const updateCardStat = async (difficulty) => {
     if (!deck) return;
-
     const cardIndex = currentCardIndex;
     const updatedDeck = { ...deck };
     const card = updatedDeck.cards[cardIndex];
-
     if (!card.stats) {
       card.stats = { easy: 0, medium: 0, difficult: 0 };
     }
-
     card.stats[difficulty] += 1;
-
     try {
       const storedDecks = await AsyncStorage.getItem('decks');
       let decks = storedDecks ? JSON.parse(storedDecks) : [];
-
       decks = decks.map(d => d.id === deck.id ? updatedDeck : d);
       await AsyncStorage.setItem('decks', JSON.stringify(decks));
       setDeck(updatedDeck);
@@ -80,12 +74,15 @@ const DeckDetails = () => {
   };
 
   const handleSeeAgain = () => {
-    const currentCard = cardsQueue[currentCardIndex];
-    const newQueue = [...cardsQueue, currentCard];
-    setCardsQueue(newQueue);
-    setShowAnswer(false);
-    setCurrentCardIndex(prev => prev + 1);
-  };
+   const currentCard = cardsQueue[currentCardIndex];
+    if (!cardsQueue.slice(currentCardIndex + 1).includes(currentCard)) {
+    setCardsQueue(prevQueue => [...prevQueue, currentCard]);
+  }
+
+  setShowAnswer(false);
+  setCurrentCardIndex(prev => prev + 1);
+};
+
 
   const handleBackToDecks = () => {
     router.push('/decks');
@@ -213,7 +210,7 @@ const styles = StyleSheet.create({
   },
   cardItem: {
     width: 361,
-    height: 550,
+    height: 450,
     paddingTop: 30,
     alignItems: 'center',
     alignSelf: 'center',
