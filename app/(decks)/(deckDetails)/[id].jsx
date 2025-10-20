@@ -46,12 +46,21 @@ const DeckDetails = () => {
   const updateCardStat = async (difficulty) => {
     if (!deck) return;
     const cardIndex = currentCardIndex;
-    const updatedDeck = { ...deck };
-    const card = updatedDeck.cards[cardIndex];
-    if (!card.stats) {
-      card.stats = { easy: 0, medium: 0, difficult: 0 };
+    const currentCard = cardsQueue[cardIndex];
+    if (!currentCard) {
+      console.warn("No current card found at index", cardIndex);
+      return;
     }
-    card.stats[difficulty] += 1;
+    const updatedDeck = { ...deck };
+    const cardInDeck = updatedDeck.cards.find(c => c.front === currentCard.front && c.back === currentCard.back);
+    if (!cardInDeck) {
+      console.warn("Card not found in deck:", currentCard);
+      return;
+    }
+    if (!cardInDeck.stats) {
+      cardInDeck.stats = { easy: 0, medium: 0, difficult: 0 };
+    }
+    cardInDeck.stats[difficulty] += 1;
     try {
       const storedDecks = await AsyncStorage.getItem('decks');
       let decks = storedDecks ? JSON.parse(storedDecks) : [];
